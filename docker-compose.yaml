@@ -1,0 +1,38 @@
+services:
+  web:
+    image: nginx:alpine
+    ports:
+      - "8080:80"
+    volumes:
+      - ./docker/nginx.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - backend
+      - frontend
+  backend:
+    image: skyblue3350/drf-remix-spa-backend:latest
+    build:
+      context: ./
+      dockerfile: ./docker/backend.dockerfile
+    command: /entrypoint.sh
+    volumes:
+      - ./backend:/app
+    depends_on:
+      - db
+    # ports:
+    #   - "8000:8000"
+  frontend:
+    image: skyblue3350/drf-remix-spa-frontend:latest
+    build:
+      context: ./
+      dockerfile: ./docker/frontend.dockerfile
+    command: npx remix vite:dev --host
+    volumes:
+      - ./frontend:/app
+    # ports:
+    #   - "5173:5173"
+  db:
+    image: postgres:13
+    environment:
+      POSTGRES_DB: "db"
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "postgres"
